@@ -6,6 +6,7 @@ import GenresPage from '../pages/GenresPage'
 import RankingsPage from '../pages/RankingsPage'
 import SubscriptionPage from '../pages/SubscriptionPage'
 import AuthPage from '../pages/AuthPage'
+import DashboardPage from '../pages/DashboardPage'
 import StoryDetailPage from '../pages/StoryDetailPage'
 import { stories } from '../lib/mockData'
 
@@ -65,6 +66,14 @@ function AppRoutes() {
         element={
           <MainLayout activeStory={stories[6]}>
             <AuthPage />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <MainLayout activeStory={stories[0]}>
+            <DashboardPage />
           </MainLayout>
         }
       />

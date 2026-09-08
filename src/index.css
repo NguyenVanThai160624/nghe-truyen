@@ -295,7 +295,34 @@ h3 {
 
 .auth-actions {
   display: flex;
+  align-items: center;
   gap: 12px;
+}
+
+.account-summary {
+  display: flex;
+  flex-direction: column;
+  max-width: 180px;
+  gap: 2px;
+  color: var(--primary);
+  line-height: 1.2;
+}
+
+.account-summary strong,
+.account-summary span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-summary strong {
+  font-size: 0.84rem;
+}
+
+.account-summary span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .mobile-tools {
@@ -333,6 +360,12 @@ h3 {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.mobile-account-summary {
+  width: 100%;
+  max-width: none;
+  padding: 4px 0;
 }
 
 .hero-section {
@@ -782,6 +815,24 @@ h3 {
   padding: 18px;
   box-shadow: 0 8px 18px rgba(15,23,42,0.03);
   margin-bottom: 24px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.section-description {
+  margin-top: 8px;
+  color: var(--text-muted);
 }
 
 .toolbar-search {

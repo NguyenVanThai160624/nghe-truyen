@@ -1,10 +1,70 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
 import { navItems } from '../lib/mockData'
+import { getDb, getFirebaseAuth, isFirebaseConfigured } from '../lib/firebase'
 import SearchBar from './SearchBar'
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [currentUser, setCurrentUser] = useState(null)
+  const [isVip, setIsVip] = useState(false)
+  const [isSigningOut, setIsSigningOut] = useState(false)
+
+  useEffect(() => {
+    const auth = getFirebaseAuth()
+    if (!isFirebaseConfigured() || !auth) return undefined
+
+    let isActive = true
+
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!isActive) return
+
+      setCurrentUser(user)
+      setIsVip(false)
+
+      if (!user) return
+
+      const db = getDb()
+      if (!db) return
+
+      try {
+        const profileSnapshot = await getDoc(doc(db, 'users', user.uid))
+        if (isActive) {
+          setIsVip(Boolean(profileSnapshot.data()?.vip))
+        }
+      } catch {
+        if (isActive) {
+          setIsVip(false)
+        }
+      }
+    })
+
+    return () => {
+      isActive = false
+      unsubscribe()
+    }
+  }, [])
+
+  const handleSignOut = async () => {
+    const auth = getFirebaseAuth()
+    if (!auth) return
+
+    setIsSigningOut(true)
+
+    try {
+      await signOut(auth)
+      setCurrentUser(null)
+      setIsVip(false)
+      setMenuOpen(false)
+    } finally {
+      setIsSigningOut(false)
+    }
+  }
+
+  const accountName = currentUser?.displayName || currentUser?.email || 'Tài khoản'
+  const membershipLabel = isVip ? 'VIP' : 'Thành viên'
 
   return (
     <header className="site-header">
@@ -36,12 +96,29 @@ function Header() {
             <SearchBar compact />
           </div>
           <div className="auth-actions">
-            <Link to="/login" className="btn btn-ghost">
-              Đăng nhập
-            </Link>
-            <Link to="/register" className="btn btn-primary">
-              Đăng ký
-            </Link>
+            {currentUser ? (
+              <>
+                <div className="account-summary" title={accountName}>
+                  <strong>{accountName}</strong>
+                  <span>{membershipLabel}</span>
+                </div>
+                <Link to="/dashboard" className="btn btn-primary">
+                  Dashboard
+                </Link>
+                <button type="button" className="btn btn-ghost" onClick={handleSignOut} disabled={isSigningOut}>
+                  {isSigningOut ? 'Đang đăng xuất...' : 'Đăng xuất'}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="btn btn-ghost">
+                  Đăng nhập
+                </Link>
+                <Link to="/register" className="btn btn-primary">
+                  Đăng ký
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
@@ -77,12 +154,29 @@ function Header() {
               ))}
             </nav>
             <div className="mobile-actions">
-              <Link to="/login" className="btn btn-ghost" onClick={() => setMenuOpen(false)}>
-                Đăng nhập
-              </Link>
-              <Link to="/register" className="btn btn-primary" onClick={() => setMenuOpen(false)}>
-                Đăng ký
-              </Link>
+              {currentUser ? (
+                <>
+                  <div className="account-summary mobile-account-summary">
+                    <strong>{accountName}</strong>
+                    <span>{membershipLabel}</span>
+                  </div>
+                  <Link to="/dashboard" className="btn btn-primary" onClick={() => setMenuOpen(false)}>
+                    Dashboard
+                  </Link>
+                  <button type="button" className="btn btn-ghost" onClick={handleSignOut} disabled={isSigningOut}>
+                    {isSigningOut ? 'Đang đăng xuất...' : 'Đăng xuất'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="btn btn-ghost" onClick={() => setMenuOpen(false)}>
+                    Đăng nhập
+                  </Link>
+                  <Link to="/register" className="btn btn-primary" onClick={() => setMenuOpen(false)}>
+                    Đăng ký
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
